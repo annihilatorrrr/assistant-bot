@@ -9,15 +9,15 @@ from core.db import db
 from modules.captcha_button.consts import captcha_cb
 from modules.voteban.views import screen_name
 
-EMOJI_DATA = []
-
 # Preload emojis
 root = xml.etree.ElementTree.parse('modules/captcha_button/annotations/ru.xml').getroot()
 annotations = root[1]
-for child in annotations:
-    if not child.attrib.get('type', '') == 'tts':
-        continue
-    EMOJI_DATA.append({'emoji': child.attrib['cp'], 'description': child.text})
+EMOJI_DATA = [
+    {'emoji': child.attrib['cp'], 'description': child.text}
+    for child in annotations
+    if child.attrib.get('type', '') == 'tts'
+]
+
 
 MAX_EMOJIS = 5
 
@@ -48,6 +48,6 @@ async def get_welcome_message(user, title, join_msg_id):
 async def get_user_msgs_to_delete_date(chat_id, user_id, date, ignore_id=None):
     q = {'message.chat.id': chat_id, 'message.from.id': user_id, 'message.date': {'$gte': date}}
     if ignore_id:
-        q.update({'message.message_id': {'$ne': ignore_id}})
+        q['message.message_id'] = {'$ne': ignore_id}
     updates = await db.updates.find(q).to_list(None)
     return updates

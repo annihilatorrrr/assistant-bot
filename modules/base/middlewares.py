@@ -63,10 +63,6 @@ async def update_chat(from_chat):
         chat.update(c)
 
         await db.chats.insert_one(chat)
-    else:
-        # I don't care about chat title, really, even username
-        pass
-
     return chat
 
 
@@ -144,17 +140,20 @@ class PrivateBotMiddleware(BaseMiddleware):
         super(PrivateBotMiddleware, self).__init__()
 
     async def on_pre_process_message(self, m: types.Message, data: dict):
-        if m.chat.type in ('group', 'supergroup'):
-            if (m.chat.username or '').lower() not in allowed_chats and str(m.chat.id) not in allowed_chats:
-                if random.random() >= 0.95:
-                    try:
-                        await dp.bot.send_message(m.chat.id,
-                                                  self.contact_required_text.format(chat_title=m.chat.title,
-                                                                                    chat_id=abs(m.chat.id)))
+        if (
+            m.chat.type in ('group', 'supergroup')
+            and (m.chat.username or '').lower() not in allowed_chats
+            and str(m.chat.id) not in allowed_chats
+            and random.random() >= 0.95
+        ):
+            try:
+                await dp.bot.send_message(m.chat.id,
+                                          self.contact_required_text.format(chat_title=m.chat.title,
+                                                                            chat_id=abs(m.chat.id)))
 
-                    except:
-                        pass
-                    raise CancelHandler()
+            except:
+                pass
+            raise CancelHandler()
 
 
 # logging_ms = dp.middleware.setup(LoggingMiddleware())

@@ -8,11 +8,7 @@ from modules.voteban.consts import voter
 def render_voteban_kb(voteban: dict) -> InlineKeyboardMarkup:
     votes_count = len(voteban.get('votes', []))
 
-    if votes_count:
-        votes_str = f" ({votes_count})"
-    else:
-        votes_str = ''
-
+    votes_str = f" ({votes_count})" if votes_count else ''
     kb = InlineKeyboardMarkup()
     kb.add(
         InlineKeyboardButton(

@@ -31,10 +31,7 @@ async def cmd_nolog(m: types.Message, user: dict, chat: dict):
             rates = await get_rates()
             args = m.text.split()
             price = args[1]
-            currency = 'EUR'
-            if len(args) > 2:
-                currency = args[2]
-
+            currency = args[2] if len(args) > 2 else 'EUR'
             try:
                 nice_price = float(price)
             except:
@@ -47,10 +44,7 @@ async def cmd_nolog(m: types.Message, user: dict, chat: dict):
 
             threshold = rates['EUR'] / rates[currency] * 200
 
-            if currency in ('RUB', 'RUR'):
-                other_curr = 'USD'
-            else:
-                other_curr = 'RUB'
+            other_curr = 'USD' if currency in ('RUB', 'RUR') else 'RUB'
             other_curr_rate = rates[currency] / rates[other_curr]
 
             if nice_price <= threshold:

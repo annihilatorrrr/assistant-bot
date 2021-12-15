@@ -11,8 +11,7 @@ from modules.nsfw.consts import MIME_TYPES
 
 async def get_file_url(file_id):
     file = await bot.get_file(file_id)
-    url = bot.get_file_url(file.file_path)
-    return url
+    return bot.get_file_url(file.file_path)
 
 
 def get_check_url(message):

@@ -35,7 +35,14 @@ build_template = '<a href="{link}">&#8203;</a><b>{title}</b>\nu/{user}\n<a href=
 
 @dp.message_handler(commands=['amd', 'build', 'reddit'])
 async def cmd_amd_build(m: types.Message, user: dict, chat: dict):
-    if not (m.chat.username in ('ru2chhw', 'Kylmakalle',) or m.chat.id in (-1001108829366,)):
+    if (
+        m.chat.username
+        not in (
+            'ru2chhw',
+            'Kylmakalle',
+        )
+        and m.chat.id not in (-1001108829366,)
+    ):
         await m.reply('Эта команда доступна только в @ru2chhw')
         return
 

@@ -47,7 +47,4 @@ class PackagesLoader:
         :param recursive:
         :return:
         """
-        result = []
-        for package in packages:
-            result.append(self.load_package(package, recursive))
-        return result
+        return [self.load_package(package, recursive) for package in packages]

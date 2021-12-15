@@ -68,9 +68,6 @@ async def new_chat_members_handler(m: types.Message, user: dict, chat: dict, new
                 delete_tasks.append(create_task(try_delete_msg(chat['id'], i['message']['message_id'])))
             kick_tasks.append(create_task(kick_timer(m.chat.id, n_c_m, [welcome_msg.message_id, m.message_id])))
             await mp.track(user['id'], StatsEvents.JOIN_CHAT, m)
-        else:
-            # User returned to chat
-            pass
     for task in kick_tasks:
         await task
 

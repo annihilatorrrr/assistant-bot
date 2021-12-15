@@ -4,7 +4,7 @@ from core import misc
 def load_modules():
     try:
         misc.loader.load_package('private.modules')
-    except (ImportError, ModuleNotFoundError):
+    except ImportError:
         pass
     misc.loader.load_packages(f"modules.{item}" for item in [
         'base',  # User management and base Middlewares

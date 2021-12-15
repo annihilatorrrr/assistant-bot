@@ -34,7 +34,7 @@ async def log(text='Logged event', event='event', chat: dict = None, user: dict 
               log_ch: [list, int, str] = None, text_kwargs: dict = None, log_kwargs: dict = None):
     if not log_kwargs:
         log_kwargs = {}
-    if not 'disable_web_page_preview' in log_kwargs:
+    if 'disable_web_page_preview' not in log_kwargs:
         log_kwargs.update(dict(disable_web_page_preview=True))
     if not text_kwargs:
         text_kwargs = {}
@@ -45,7 +45,7 @@ async def log(text='Logged event', event='event', chat: dict = None, user: dict 
     if chat.get('log_ch'):
         await send_log(chat_id=chat['log_ch'], text=text, **log_kwargs)
     if log_ch:
-        if isinstance(log_ch, int) or isinstance(log_ch, str):
+        if isinstance(log_ch, (int, str)):
             await send_log(chat_id=log_ch, text=text, **log_kwargs)
         elif isinstance(log_ch, list):
             for chid in log_ch:

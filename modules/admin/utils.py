@@ -25,11 +25,10 @@ def get_time_args(args: str):
             else:
                 raise InvalidTokenError
         except InvalidTokenError:
-            if args_list:
-                invalid_tokens.append(args_list[-1])
-                del args_list[-1]
-            else:
+            if not args_list:
                 break
+            invalid_tokens.append(args_list[-1])
+            del args_list[-1]
     return args_list, list(reversed(invalid_tokens))
 
 
@@ -93,9 +92,8 @@ async def get_user_id(m: types.Message):
             user = await db.users.find_one({'username': {'$regex': mention.replace('@', ''), '$options': 'i'}})
             if not user:
                 continue
-            else:
-                uid = user['id']
-                break
+            uid = user['id']
+            break
         elif entity.type == types.MessageEntityType.HASHTAG:
             hashtag = entity.get_text(m.text)
             if get_substring_line(m.text, hashtag) != 0:
@@ -113,11 +111,10 @@ async def get_user_id(m: types.Message):
         if not args:
             m.text = ' '.join(m.text.split())
             cmd, args = m.text.split(' ', 1)
+        elif len(args) > 1:
+            args = args[1]
         else:
-            if len(args) > 1:
-                args = args[1]
-            else:
-                raise Exception('No uid found')
+            raise Exception('No uid found')
         try:
             uid = int(args.strip())
         except:

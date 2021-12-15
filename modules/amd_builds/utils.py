@@ -70,18 +70,17 @@ async def get_build(amount=100):
     log.info(
         f'BUILDS AMOUNT {len(builds)}'
     )
-    if builds:
-        photo = None
-        random.shuffle(builds)
-        while True:
-            random_build = random.choice(builds)
-            log.info(f'RANDOMBUILD {random_build["id"]}')
-            photo = get_build_photo(random_build)
-            if photo:
-                log.info(f'SENT Random build {random_build["id"]}')
-                return {'photo': photo, 'title': random_build['title'], 'reddit_url': random_build['permalink']}
-    else:
+    if not builds:
         return
+    photo = None
+    random.shuffle(builds)
+    while True:
+        random_build = random.choice(builds)
+        log.info(f'RANDOMBUILD {random_build["id"]}')
+        photo = get_build_photo(random_build)
+        if photo:
+            log.info(f'SENT Random build {random_build["id"]}')
+            return {'photo': photo, 'title': random_build['title'], 'reddit_url': random_build['permalink']}
 
 
 def get_build_photo(build):
@@ -97,10 +96,7 @@ def get_build_photo(build):
 
     except Exception as e:
         log.error(f'Error media-content {e}')
-        pass
-
     try:
         return build['source']['url']
     except Exception as e:
         log.error(f'Error source-url {e}')
-        pass

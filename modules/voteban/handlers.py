@@ -137,8 +137,8 @@ async def btn_vote(c: types.CallbackQuery, user: dict, chat: dict, callback_data
         user_request = await bot.get_chat_member(chat['id'], c.from_user.id)
     except:
         return
-    if user_request.can_restrict_members or user_request.status == 'creator' or user.get('status', 0) >= 3:
-        if voteban['active']:
+    if voteban['active']:
+        if user_request.can_restrict_members or user_request.status == 'creator' or user.get('status', 0) >= 3:
             vote_user = await db.users.find_one({'id': int(callback_data['user_id'])})
             vote_user.update({'spamer': 1.0})
             usr = {'$set': vote_user}
@@ -158,22 +158,9 @@ async def btn_vote(c: types.CallbackQuery, user: dict, chat: dict, callback_data
             await log(event=LogEvents.BAN, chat=chat, user=vote_user, message_id=c.message.message_id, admin=user)
             await mp.track(c.from_user.id, StatsEvents.VOTEBAN_CONFIRM, c)
         else:
-            if voteban['confirmed']:
-                text = 'Воутбан завершён, пользователь был забанен.'
-            else:
-                text = 'Воутбан завершён, пользователь не был забанен.'
-
-            await c.answer(text=text, show_alert=True)
-            await c.message.edit_text(text=c.message.html_text + '\n\n' + hitalic(text))
-    else:
-        if voteban['active']:
             user_voted = bool([vote for vote in voteban['votes'] if vote['user_id'] == user['id']])
 
-            if user_voted:
-                command = '$pull'
-            else:
-                command = '$push'
-
+            command = '$pull' if user_voted else '$push'
             u = {command: {'votes': {'user_id': user['id']}}}
 
             voteban = await update_voteban(voteban['chat_id'], voteban['user_id'], u)
@@ -190,11 +177,11 @@ async def btn_vote(c: types.CallbackQuery, user: dict, chat: dict, callback_data
                 answer_text = 'Вы проголосовали за бан'
                 await mp.track(c.from_user.id, StatsEvents.VOTEBAN_VOTE, c)
             await c.answer(text=answer_text)
+    else:
+        if voteban['confirmed']:
+            text = 'Воутбан завершён, пользователь был забанен.'
         else:
-            if voteban['confirmed']:
-                text = 'Воутбан завершён, пользователь был забанен.'
-            else:
-                text = 'Воутбан завершён, пользователь не был забанен.'
+            text = 'Воутбан завершён, пользователь не был забанен.'
 
-            await c.answer(text=text, show_alert=True)
-            await c.message.edit_text(text=c.message.html_text + '\n\n' + hitalic(text))
+        await c.answer(text=text, show_alert=True)
+        await c.message.edit_text(text=c.message.html_text + '\n\n' + hitalic(text))

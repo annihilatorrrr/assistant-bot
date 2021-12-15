@@ -192,44 +192,48 @@ async def timed_restriction(m: types.Message, user: dict, chat: dict, action='ba
         until_date = get_next_day_msk().astimezone(pytz.utc)  # 21:00 UTC, 00:00 MSK
         time_string = f"{(until_date.replace(tzinfo=None) - now).total_seconds()}s"
 
-    if valid_duration(time_string):
-        duration = Duration(time_string)
-
-        ban_seconds = duration.to_seconds()
-        # Чтобы без пермачей
-        if ban_seconds <= 30:
-            ban_seconds = 31
-        if ban_seconds > 31_536_000:
-            ban_seconds = 31_536_000 - 1
-        human_time = format_seconds(ban_seconds)
-        try:
-            await bot.restrict_chat_member(chat_id, target_user_id,
-                                           until_date=until_date if until_date else timedelta(seconds=ban_seconds),
-                                           can_send_messages=action != 'ban',
-                                           can_send_media_messages=False, can_send_other_messages=False,
-                                           can_add_web_page_previews=False)
-        except Exception as e:
-            return await m.reply('штото пошло не так :((')
-        kb = types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton('Unban', callback_data=unban_cb.new(
-            chat_id=str(chat['id']),
-            user_id=str(ban_user['id'])
-        )))
-        await add_log(chat_id, target_user_id, log_event, by=m.from_user.id)
-
-        text_kwargs = {'duration': human_time}
-        if other_tokens:
-            text_kwargs['reason'] = ' '.join(other_tokens)
-
-        await log(event=log_event, chat=chat, user=ban_user, message_id=m.message_id, admin=user,
-                  text_kwargs=text_kwargs,
-                  log_kwargs={'reply_markup': kb})
-        await mp.track(m.from_user.id, StatsEvents.TEMPBAN, m)
-
-        await m.reply(
-            get_restrict_text(chat, action, till_next_day=bool(until_date)).format(human_time=hbold(human_time)))
-    else:
+    if not valid_duration(time_string):
         return await m.reply('Я такие даты не понимаю')
+    duration = Duration(time_string)
+
+    ban_seconds = duration.to_seconds()
+    # Чтобы без пермачей
+    if ban_seconds <= 30:
+        ban_seconds = 31
+    if ban_seconds > 31_536_000:
+        ban_seconds = 31_536_000 - 1
+    human_time = format_seconds(ban_seconds)
+    try:
+        await bot.restrict_chat_member(
+            chat_id,
+            target_user_id,
+            until_date=until_date or timedelta(seconds=ban_seconds),
+            can_send_messages=action != 'ban',
+            can_send_media_messages=False,
+            can_send_other_messages=False,
+            can_add_web_page_previews=False,
+        )
+
+    except Exception as e:
+        return await m.reply('штото пошло не так :((')
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Unban', callback_data=unban_cb.new(
+        chat_id=str(chat['id']),
+        user_id=str(ban_user['id'])
+    )))
+    await add_log(chat_id, target_user_id, log_event, by=m.from_user.id)
+
+    text_kwargs = {'duration': human_time}
+    if other_tokens:
+        text_kwargs['reason'] = ' '.join(other_tokens)
+
+    await log(event=log_event, chat=chat, user=ban_user, message_id=m.message_id, admin=user,
+              text_kwargs=text_kwargs,
+              log_kwargs={'reply_markup': kb})
+    await mp.track(m.from_user.id, StatsEvents.TEMPBAN, m)
+
+    await m.reply(
+        get_restrict_text(chat, action, till_next_day=bool(until_date)).format(human_time=hbold(human_time)))
 
 
 async def ban_sender_chat(message: types.Message, target: Optional[types.Chat] = None):

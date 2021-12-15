@@ -17,16 +17,19 @@ RATES = {}
 
 async def get_rates():
     global RATES_UPDATE
-    if 'EUR' in RATES and 'USD' in RATES:
-        if RATES_UPDATE:
-            if RATES_UPDATE + timedelta(hours=8) >= datetime.utcnow():
-                return RATES
+    if (
+        'EUR' in RATES
+        and 'USD' in RATES
+        and RATES_UPDATE
+        and RATES_UPDATE + timedelta(hours=8) >= datetime.utcnow()
+    ):
+        return RATES
 
     fetched_rates = await fetch_rates()
     try:
         usd_price = fetched_rates['base']['840']['0']['sellValue']
     except KeyError:
-        log.exception(f'Error fetching price', exc_info=True)
+        log.exception('Error fetching price', exc_info=True)
         usd_price = 73.08
     try:
         eur_price = fetched_rates['base']['978']['0']['sellValue']
@@ -70,6 +73,4 @@ def format_fiat(symbol, value):
     elif symbol == 'EUR':
         pos[0] = value
         pos[1] = '€'
-    else:
-        pass
     return '{} {}'.format(pos[0], pos[1])

@@ -61,4 +61,4 @@ if os.path.isfile(whitelist_file_path):
             allowed_chats = f.readlines()
             allowed_chats = [chat.rstrip() for chat in allowed_chats]
     except Exception as e:
-        log.exception(f'Cant read whitelist file', exc_info=True)
+        log.exception('Cant read whitelist file', exc_info=True)
